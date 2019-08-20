@@ -28,7 +28,7 @@ console.log(isEven(-1));
 
 function countBs(string) {
   let howManyBs = 0;
-  for (let num = 0; num <= string.length - 1; num++) {
+  for (let num = 0; num < string.length; num++) {
     if (string[num] === 'B') {
       howManyBs++;
     }
@@ -41,7 +41,7 @@ console.log(countBs('BBC'));
 
 function countChar(string, char) {
   let howManyChars = 0;
-  for (let num = 0; num <= string.length - 1; num++) {
+  for (let num = 0; num < string.length; num++) {
     if (string[num] === char) {
       howManyChars++;
     }
