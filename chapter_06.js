@@ -387,3 +387,263 @@ let stringObject = {
 };
 console.log(stringObject[toStringSymbol]());
 // → a jute rope
+
+// The iterator interface
+
+// The object given to a for/of loop is expected to be iterable. This means it has a method named with the Symbol.iterator symbol
+// (a symbol value defined by the language, stored as a property of the Symbol function).
+
+// When called, that method should return an object that provides a second interface, iterator. This is the actual thing that iterates.
+// It has a next method that returns the next result. That result should be an object with a value property that provides the next value,
+// if there is one, and a done property, which should be true when there are no more results and false otherwise.
+
+// Note that the next, value, and done property names are plain strings, not symbols. Only Symbol.iterator, which is likely to be added
+// to a lot of different objects, is an actual symbol.
+
+// We can directly use this interface ourselves.
+
+let okIterator = 'OK'[Symbol.iterator]();
+console.log(okIterator.next());
+// → {value: "O", done: false}
+console.log(okIterator.next());
+// → {value: "K", done: false}
+console.log(okIterator.next());
+// → {value: undefined, done: true}
+
+// Let’s implement an iterable data structure. We’ll build a matrix class, acting as a two-dimensional array.
+
+class Matrix {
+  constructor(width, height, element = (x, y) => undefined) {
+    this.width = width;
+    this.height = height;
+    this.content = [];
+
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        this.content[y * width + x] = element(x, y); // stores at this point in the matrix, whatever the function provided returns
+      }
+    }
+  }
+
+  get(x, y) {
+    return this.content[y * this.width + x];
+  }
+  set(x, y, value) {
+    this.content[y * this.width + x] = value;
+  }
+}
+
+// The class stores its content in a single array of width × height elements. The elements are stored row by row, so,
+// for example, the third element in the fifth row is (using zero-based indexing) stored at position 4 × width + 2.
+
+// The constructor function takes a width, a height, and an optional element function that will be used to fill in the
+// initial values. There are get and set methods to retrieve and update elements in the matrix.
+
+// When looping over a matrix, you are usually interested in the position of the elements as well as the elements themselves,
+// so we’ll have our iterator produce objects with x, y, and value properties.
+
+class MatrixIterator {
+  constructor(matrix) {
+    this.x = 0;
+    this.y = 0;
+    this.matrix = matrix;
+  }
+
+  next() {
+    if (this.y == this.matrix.height) return { done: true };
+
+    let value = { x: this.x, y: this.y, value: this.matrix.get(this.x, this.y) };
+    this.x++;
+    if (this.x == this.matrix.width) {
+      this.x = 0;
+      this.y++;
+    }
+    return { value, done: false };
+  }
+}
+
+// The class tracks the progress of iterating over a matrix in its x and y properties. The next method starts by checking whether the
+// bottom of the matrix has been reached. If it hasn’t, it first creates the object holding the current value and then updates its position,
+// moving to the next row if necessary.
+
+// Let’s set up the Matrix class to be iterable. Throughout this book, I’ll occasionally use after-the-fact prototype manipulation to add
+// methods to classes so that the individual pieces of code remain small and self-contained. In a regular program, where there is no need
+// to split the code into small pieces, you’d declare these methods directly in the class instead.
+
+Matrix.prototype[Symbol.iterator] = function() {
+  return new MatrixIterator(this);
+};
+// We can now loop over a matrix with for/of.
+
+let matrix = new Matrix(2, 2, (x, y) => `value ${x},${y}`);
+for (let { x, y, value } of matrix) {
+  console.log(x, y, value);
+}
+// → 0 0 value 0,0
+// → 1 0 value 1,0
+// → 0 1 value 0,1
+// → 1 1 value 1,1
+
+// Getters, setters, and statics
+console.log('Getters setters and statics');
+
+// Interfaces often consist mostly of methods, but it is also okay to include properties that hold non-function values.
+// For example, Map objects have a size property that tells you how many keys are stored in them.
+
+// It is not even necessary for such an object to compute and store such a property directly in the instance.
+// Even properties that are accessed directly may hide a method call. Such methods are called getters, and they are defined by writing
+// get in front of the method name in an object expression or class declaration.
+
+let varyingSize = {
+  get size() {
+    return Math.floor(Math.random() * 100);
+  }
+};
+
+console.log(varyingSize.size);
+// → 73
+console.log(varyingSize.size);
+// → 49
+
+let varyingSize2 = {
+  size() {
+    return Math.floor(Math.random() * 100);
+  }
+};
+
+console.log(varyingSize2.size());
+
+// Whenever someone reads from this object’s size property, the associated method is called. You can do a similar thing when
+// a property is written to, using a setter.
+
+class Temperature {
+  constructor(celsius) {
+    this.celsius = celsius;
+  }
+  get fahrenheit() {
+    return this.celsius * 1.8 + 32;
+  }
+  set fahrenheit(value) {
+    this.celsius = (value - 32) / 1.8;
+  }
+
+  static fromFahrenheit(value) {
+    return new Temperature((value - 32) / 1.8);
+  }
+}
+
+let temp = new Temperature(22);
+console.log(temp.fahrenheit);
+// → 71.6
+temp.fahrenheit = 86;
+console.log(temp.celsius);
+// → 30
+
+// The Temperature class allows you to read and write the temperature in either degrees Celsius or degrees Fahrenheit, but internally it
+// stores only Celsius and automatically converts to and from Celsius in the fahrenheit getter and setter.
+
+// Sometimes you want to attach some properties directly to your constructor function, rather than to the prototype. Such methods won’t
+// have access to a class instance but can, for example, be used to provide additional ways to create instances.
+
+// Inside a class declaration, methods that have static written before their name are stored on the constructor. So the Temperature class
+// allows you to write Temperature.fromFahrenheit(100) to create a temperature using degrees Fahrenheit.
+console.log('******');
+let temp2 = Temperature.fromFahrenheit(100);
+console.log(temp2.celsius);
+console.log(temp2.fahrenheit);
+temp2.fahrenheit = 86;
+console.log(temp2.celsius);
+
+// Inheritance
+
+// Some matrices are known to be symmetric. If you mirror a symmetric matrix around its top-left-to-bottom-right diagonal,
+// it stays the same. In other words, the value stored at x,y is always the same as that at y,x.
+
+// Imagine we need a data structure like Matrix but one that enforces the fact that the matrix is and remains symmetrical.
+// We could write it from scratch, but that would involve repeating some code very similar to what we already wrote.
+
+// JavaScript’s prototype system makes it possible to create a new class, much like the old class, but with new definitions for
+// some of its properties. The prototype for the new class derives from the old prototype but adds a new definition for, say, the set method.
+
+// In object-oriented programming terms, this is called inheritance. The new class inherits properties and behavior from the old class.
+
+class SymmetricMatrix extends Matrix {
+  constructor(size, element = (x, y) => undefined) {
+    super(size, size, (x, y) => {
+      if (x < y) return element(y, x);
+      else return element(x, y);
+    });
+  }
+
+  set(x, y, value) {
+    super.set(x, y, value);
+    if (x != y) {
+      super.set(y, x, value);
+    }
+  }
+}
+
+let matrix2 = new SymmetricMatrix(5, (x, y) => `${x},${y}`);
+console.log(matrix2.get(2, 3));
+// → 3,2
+
+// The use of the word extends indicates that this class shouldn’t be directly based on the default Object prototype but on
+// some other class. This is called the superclass. The derived class is the subclass.
+
+// To initialize a SymmetricMatrix instance, the constructor calls its superclass’s constructor through the super keyword. This is
+// necessary because if this new object is to behave (roughly) like a Matrix, it is going to need the instance properties that
+// matrices have. To ensure the matrix is symmetrical, the constructor wraps the element function to swap the coordinates for values below the diagonal.
+
+// The set method again uses super but this time not to call the constructor but to call a specific method from the superclass’s
+// set of methods. We are redefining set but do want to use the original behavior. Because this.set refers to the new set method,
+// calling that wouldn’t work. Inside class methods, super provides a way to call methods as they were defined in the superclass.
+
+// Inheritance allows us to build slightly different data types from existing data types with relatively little work. It is a
+// fundamental part of the object-oriented tradition, alongside encapsulation and polymorphism. But while the latter two are now
+// generally regarded as wonderful ideas, inheritance is more controversial.
+
+// Whereas encapsulation and polymorphism can be used to separate pieces of code from each other, reducing the tangledness of the overall
+// program, inheritance fundamentally ties classes together, creating more tangle. When inheriting from a class, you usually have to
+// know more about how it works than when simply using it. Inheritance can be a useful tool, and I use it now and then in my own
+// programs, but it shouldn’t be the first tool you reach for, and you probably shouldn’t actively go looking for opportunities to construct
+// class hierarchies (family trees of classes).
+
+// The instanceof operator
+
+// It is occasionally useful to know whether an object was derived from a specific class. For this, JavaScript provides a binary
+// operator called instanceof.
+
+console.log(new SymmetricMatrix(2) instanceof SymmetricMatrix);
+// → true
+console.log(new SymmetricMatrix(2) instanceof Matrix);
+// → true
+console.log(new Matrix(2, 2) instanceof SymmetricMatrix);
+// → false
+console.log([1] instanceof Array);
+// → true
+
+// The operator will see through inherited types, so a SymmetricMatrix is an instance of Matrix. The operator can also be
+// applied to standard constructors like Array. Almost every object is an instance of Object.
+
+// Summary
+// So objects do more than just hold their own properties. They have prototypes, which are other objects. They’ll act as if they have properties
+// they don’t have as long as their prototype has that property. Simple objects have Object.prototype as their prototype.
+
+// Constructors, which are functions whose names usually start with a capital letter, can be used with the new operator to create new objects.
+// The new object’s prototype will be the object found in the prototype property of the constructor. You can make good use of this by putting
+// the properties that all values of a given type share into their prototype. There’s a class notation that provides a clear way to define a
+// constructor and its prototype.
+
+// You can define getters and setters to secretly call methods every time an object’s property is accessed. Static methods are methods stored
+// in a class’s constructor, rather than its prototype.
+
+// The instanceof operator can, given an object and a constructor, tell you whether that object is an instance of that constructor.
+
+// One useful thing to do with objects is to specify an interface for them and tell everybody that they are supposed to talk to your object only
+// through that interface. The rest of the details that make up your object are now encapsulated, hidden behind the interface.
+
+// More than one type may implement the same interface. Code written to use an interface automatically knows how to work with any number of
+// different objects that provide the interface. This is called polymorphism.
+
+// When implementing multiple classes that differ in only some details, it can be helpful to write the new classes as subclasses of an existing class,
+// inheriting part of its behavior.
