@@ -371,3 +371,280 @@ console.log(stripComments('1 /* a */+/* b */ 1'));
 
 // A lot of bugs in regular expression programs can be traced to unintentionally using a greedy operator where a nongreedy one would work better.
 // When using a repetition operator, consider the nongreedy variant first.
+
+// Dynamically creating RegExp objects
+// There are cases where you might not know the exact pattern you need to match against when you are writing your code.
+// Say you want to look for the user’s name in a piece of text and enclose it in underscore characters to make it stand out.
+// Since you will know the name only once the program is actually running, you can’t use the slash-based notation.
+
+// But you can build up a string and use the RegExp constructor on that. Here’s an example:
+
+let name = 'harry';
+let text = 'Harry is a suspicious character.';
+let regexp = new RegExp('\\b(' + name + ')\\b', 'gi');
+console.log(regexp);
+/// \b(harry)\b/gi
+console.log(text.replace(regexp, '_$1_'));
+// → _Harry_ is a suspicious character.
+
+// When creating the \b boundary markers, we have to use two backslashes because we are writing them in a normal string,
+// not a slash-enclosed regular expression. The second argument to the RegExp constructor contains the options for the regular expression—in
+// this case, "gi" for global and case insensitive.
+
+// But what if the name is "dea+hl[]rd" because our user is a nerdy teenager? That would result in a nonsensical regular
+// expression that won’t actually match the user’s name.
+
+// To work around this, we can add backslashes before any character that has a special meaning.
+
+let name2 = 'dea+hl[]rd';
+let text2 = 'This dea+hl[]rd guy is super annoying.';
+let escaped = name2.replace(/[\\[.+*?(){|^$]/g, '\\$&');
+console.log(escaped);
+// dea\+hl\[]rd
+let regexp2 = new RegExp('\\b' + escaped + '\\b', 'gi');
+console.log(regexp2);
+console.log(text2.replace(regexp2, '_$&_'));
+// → This _dea+hl[]rd_ guy is super annoying.
+
+// The search method
+// The indexOf method on strings cannot be called with a regular expression. But there is another method, search, that does expect a regular
+// expression. Like indexOf, it returns the first index on which the expression was found, or -1 when it wasn’t found.
+
+console.log('  word'.search(/\S/));
+// → 2
+console.log('    '.search(/\S/));
+// → -1
+
+// Unfortunately, there is no way to indicate that the match should start at a given offset (like we can with the second argument to indexOf),
+// which would often be useful.
+
+// The lastIndex property
+// The exec method similarly does not provide a convenient way to start searching from a given position in the string.
+// But it does provide an inconvenient way.
+
+// Regular expression objects have properties. One such property is source, which contains the string that expression was created from.
+// Another property is lastIndex, which controls, in some limited circumstances, where the next match will start.
+
+// Those circumstances are that the regular expression must have the global (g) or sticky (y) option enabled, and the match
+// must happen through the exec method. Again, a less confusing solution would have been to just allow an extra argument to be
+// passed to exec, but confusion is an essential feature of JavaScript’s regular expression interface.
+
+let pattern = /y/g;
+pattern.lastIndex = 3;
+let match2 = pattern.exec('xyzzy');
+console.log(match2.index);
+// → 4
+console.log(pattern.lastIndex);
+// → 5
+
+// If the match was successful, the call to exec automatically updates the lastIndex property to point after the match.
+// If no match was found, lastIndex is set back to zero, which is also the value it has in a newly constructed regular expression object.
+
+// The difference between the global and the sticky options is that, when sticky is enabled, the match will succeed only if it starts
+// directly at lastIndex, whereas with global, it will search ahead for a position where a match can start.
+
+let global = /abc/g;
+console.log(global.exec('xyz abc'));
+// → ["abc"]
+let sticky = /abc/y;
+console.log(sticky.exec('xyz abc'));
+// → null
+
+// When using a shared regular expression value for multiple exec calls, these automatic updates to the lastIndex property can cause problems.
+// Your regular expression might be accidentally starting at an index that was left over from a previous call.
+
+let digit = /\d/g;
+
+console.log(digit.exec('here it is: 1'));
+// → ["1"]
+console.log(digit.exec('and now: 1'));
+// → null
+
+// Another interesting effect of the global option is that it changes the way the match method on strings works.
+// When called with a global expression, instead of returning an array similar to that returned by exec, match will find all matches of the
+// pattern in the string and return an array containing the matched strings.
+
+console.log('Banana'.match(/an/g));
+// → ["an", "an"]
+
+// So be cautious with global regular expressions. The cases where they are necessary—calls to replace and places where you want
+// to explicitly use lastIndex—are typically the only places where you want to use them.
+
+// Looping over matches
+
+// A common thing to do is to scan through all occurrences of a pattern in a string, in a way that gives us access to the match object in the loop body.
+// We can do this by using lastIndex and exec.
+
+let input = 'A string with 3 numbers in it... 42 and 88.';
+let number = /\b\d+\b/g;
+let match3;
+while ((match3 = number.exec(input))) {
+  console.log('Found', match3[0], 'at', match3.index);
+}
+// → Found 3 at 14
+//   Found 42 at 33
+//   Found 88 at 40
+
+// This makes use of the fact that the value of an assignment expression (=) is the assigned value. So by using match = number.exec(input) as
+// the condition in the while statement, we perform the match at the start of each iteration, save its result in a binding,
+// and stop looping when no more matches are found.
+
+// Parsing an INI file
+
+// To conclude the chapter, we’ll look at a problem that calls for regular expressions. Imagine we are writing a program to automatically
+// collect information about our enemies from the Internet. (We will not actually write that program here, just the part that reads the configuration file. Sorry.)
+// The configuration file looks like this:
+
+// searchengine=https://duckduckgo.com/?q=$1
+// spitefulness=9.7
+
+// ; comments are preceded by a semicolon...
+// ; each section concerns an individual enemy
+// [larry]
+// fullname=Larry Doe
+// type=kindergarten bully
+// website=http://www.geocities.com/CapeCanaveral/11451
+
+// [davaeorn]
+// fullname=Davaeorn
+// type=evil wizard
+// outputdir=/home/marijn/enemies/davaeorn
+
+// The exact rules for this format (which is a widely used format, usually called an INI file) are as follows:
+
+// Blank lines and lines starting with semicolons are ignored.
+
+// Lines wrapped in [ and ] start a new section.
+
+// Lines containing an alphanumeric identifier followed by an = character add a setting to the current section.
+
+// Anything else is invalid.
+
+// Our task is to convert a string like this into an object whose properties hold strings for settings written before the first section
+// header and subobjects for sections, with those subobjects holding the section’s settings.
+
+// Since the format has to be processed line by line, splitting up the file into separate lines is a good start. We saw the split method
+// in Chapter 4. Some operating systems, however, use not just a newline character to separate lines but a carriage return character followed by a
+// newline ("\r\n"). Given that the split method also allows a regular expression as its argument, we can use a regular expression like /\r?\n/ to
+// split in a way that allows both "\n" and "\r\n" between lines.
+
+function parseINI(string) {
+  // Start with an object to hold the top-level fields
+  let result = {};
+  let section = result;
+  string.split(/\r?\n/).forEach(line => {
+    let match;
+    if ((match = line.match(/^(\w+)=(.*)$/))) {
+      section[match[1]] = match[2];
+    } else if ((match = line.match(/^\[(.*)\]$/))) {
+      section = result[match[1]] = {};
+    } else if (!/^\s*(;.*)?$/.test(line)) {
+      throw new Error("Line '" + line + "' is not valid.");
+    }
+  });
+  return result;
+}
+
+console.log(
+  parseINI(`
+name=Vasilis
+[address]
+city=Tessaloniki`)
+);
+// → {name: "Vasilis", address: {city: "Tessaloniki"}}
+
+// The code goes over the file’s lines and builds up an object. Properties at the top are stored directly into that object, whereas
+// properties found in sections are stored in a separate section object. The section binding points at the object for the current section.
+
+// There are two kinds of significant lines—section headers or property lines. When a line is a regular property, it is stored in the current section.
+// When it is a section header, a new section object is created, and section is set to point at it.
+
+// Note the recurring use of ^ and $ to make sure the expression matches the whole line, not just part of it. Leaving these out results in code
+// that mostly works but behaves strangely for some input, which can be a difficult bug to track down.
+
+// The pattern if (match = string.match(...)) is similar to the trick of using an assignment as the condition for while. You often aren’t sure
+// that your call to match will succeed, so you can access the resulting object only inside an if statement that tests for this. To not break the
+// pleasant chain of else if forms, we assign the result of the match to a binding and immediately use that assignment as the test for the if statement.
+
+// If a line is not a section header or a property, the function checks whether it is a comment or an empty line using the expression /^\s*(;.*)?$/.
+// Do you see how it works? The part between the parentheses will match comments, and the ? makes sure it also matches lines containing only whitespace.
+// When a line doesn’t match any of the expected forms, the function throws an exception.
+
+// International characters
+
+// Because of JavaScript’s initial simplistic implementation and the fact that this simplistic approach was later set in stone as standard behavior,
+// JavaScript’s regular expressions are rather dumb about characters that do not appear in the English language. For example, as far as JavaScript’s
+// regular expressions are concerned, a “word character” is only one of the 26 characters in the Latin alphabet (uppercase or lowercase), decimal
+// digits, and, for some reason, the underscore character. Things like é or β, which most definitely are word characters, will not match \w (and will
+// match uppercase \W, the nonword category).
+
+// By a strange historical accident, \s (whitespace) does not have this problem and matches all characters that the Unicode standard considers whitespace,
+// including things like the nonbreaking space and the Mongolian vowel separator.
+
+// Another problem is that, by default, regular expressions work on code units, as discussed in Chapter 5, not actual characters. This means characters that
+// are composed of two code units behave strangely.
+
+console.log(/🍎{3}/.test('🍎🍎🍎'));
+// → false
+console.log(/<.>/.test('<🌹>'));
+// → false
+console.log(/<.>/u.test('<🌹>'));
+// → true
+
+// The problem is that the 🍎 in the first line is treated as two code units, and the {3} part is applied only to the second one. Similarly, the
+// dot matches a single code unit, not the two that make up the rose emoji.
+
+// You must add a u option (for Unicode) to your regular expression to make it treat such characters properly. The wrong behavior remains the default,
+// unfortunately, because changing that might cause problems for existing code that depends on it.
+
+// Though this was only just standardized and is, at the time of writing, not widely supported yet, it is possible to use \p in a regular expression
+// (that must have the Unicode option enabled) to match all characters to which the Unicode standard assigns a given property.
+
+console.log(/\p{Script=Greek}/u.test('α'));
+// → true
+console.log(/\p{Script=Arabic}/u.test('α'));
+// → false
+console.log(/\p{Alphabetic}/u.test('α'));
+// → true
+console.log(/\p{Alphabetic}/u.test('!'));
+// → false
+
+// Unicode defines a number of useful properties, though finding the one that you need may not always be trivial.
+// You can use the \p{Property=Value} notation to match any character that has the given value for that property.
+// If the property name is left off, as in \p{Name}, the name is assumed to be either a binary property such as Alphabetic or a category such as Number.
+
+// Summary
+// Regular expressions are objects that represent patterns in strings. They use their own language to express these patterns.
+
+// /abc/	A sequence of characters
+// /[abc]/	Any character from a set of characters
+// /[^abc]/	Any character not in a set of characters
+// /[0-9]/	Any character in a range of characters
+// /x+/	One or more occurrences of the pattern x
+// /x+?/	One or more occurrences, nongreedy
+// /x*/	Zero or more occurrences
+// /x?/	Zero or one occurrence
+// /x{2,4}/	Two to four occurrences
+// /(abc)/	A group
+// /a|b|c/	Any one of several patterns
+// /\d/	Any digit character
+// /\w/	An alphanumeric character (“word character”)
+// /\s/	Any whitespace character
+// /./	Any character except newlines
+// /\b/	A word boundary
+// /^/	Start of input
+// /$/	End of input
+
+// A regular expression has a method test to test whether a given string matches it. It also has a method exec that, when a match is found,
+// returns an array containing all matched groups. Such an array has an index property that indicates where the match started.
+
+// Strings have a match method to match them against a regular expression and a search method to search for one, returning only the starting
+// position of the match. Their replace method can replace matches of a pattern with a replacement string or function.
+
+// Regular expressions can have options, which are written after the closing slash. The i option makes the match case insensitive. The g option
+// makes the expression global, which, among other things, causes the replace method to replace all instances instead of just the first. The y
+// option makes it sticky, which means that it will not search ahead and skip part of the string when looking for a match. The u option turns
+// on Unicode mode, which fixes a number of problems around the handling of characters that take up two code units.
+
+// Regular expressions are a sharp tool with an awkward handle. They simplify some tasks tremendously but can quickly become unmanageable when
+// applied to complex problems. Part of knowing how to use them is resisting the urge to try to shoehorn things that they cannot cleanly express into them.
