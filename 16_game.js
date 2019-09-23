@@ -75,6 +75,7 @@ var Player = class Player {
 };
 
 Player.prototype.size = new Vec(0.8, 1.5);
+// The size property is the same for all instances of Player, so we store it on the prototype rather than on the instances themselves
 
 var Lava = class Lava {
   constructor(pos, speed, reset) {
