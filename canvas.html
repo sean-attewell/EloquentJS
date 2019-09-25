@@ -1,0 +1,267 @@
+<p>Before canvas.</p>
+<canvas width="120" height="60"></canvas>
+<p>After canvas.</p>
+<script>
+  let canvas = document.querySelector('canvas');
+  let context = canvas.getContext('2d');
+  context.fillStyle = 'red';
+  context.fillRect(10, 10, 100, 50);
+</script>
+
+<!-- After creating the context object, the example draws a red rectangle 100 pixels wide and 50 pixels high, with its top-left corner at coordinates (10,10).
+
+Just like in HTML (and SVG), the coordinate system that the canvas uses puts (0,0) at the top-left corner, and the positive y-axis goes down from there. So (10,10) is 10 pixels below and to the right of the top-left corner. -->
+
+<canvas></canvas>
+<script>
+  let cx = document.querySelector('canvas').getContext('2d');
+  cx.strokeStyle = 'blue';
+  cx.strokeRect(5, 5, 50, 50);
+  cx.lineWidth = 5;
+  cx.strokeRect(135, 5, 50, 50);
+</script>
+
+<canvas></canvas>
+<script>
+  let cx = document.querySelector('canvas').getContext('2d');
+  cx.beginPath();
+  for (let y = 10; y < 100; y += 10) {
+    cx.moveTo(10, y);
+    cx.lineTo(90, y);
+  }
+  cx.stroke();
+</script>
+
+<canvas></canvas>
+<script>
+  let cx = document.querySelector('canvas').getContext('2d');
+  cx.beginPath();
+  cx.moveTo(50, 10);
+  cx.lineTo(10, 70);
+  cx.lineTo(90, 70);
+  cx.fill();
+</script>
+
+<!-- This example draws a filled triangle. Note that only two of the triangle’s sides are explicitly drawn. The third, from the bottom-right corner back to the top, is implied and wouldn’t be there when you stroke the path.
+
+You could also use the closePath method to explicitly close a path by adding an actual line segment back to the path’s start. This segment is drawn when stroking the path. -->
+
+<canvas></canvas>
+<script>
+  let cx = document.querySelector('canvas').getContext('2d');
+  cx.beginPath();
+  cx.moveTo(10, 90);
+  // control=(60,10) goal=(90,90)
+  cx.quadraticCurveTo(60, 10, 90, 90);
+  cx.lineTo(60, 10);
+  cx.closePath();
+  cx.stroke();
+</script>
+
+<canvas></canvas>
+<script>
+  let cx = document.querySelector('canvas').getContext('2d');
+  cx.beginPath();
+  cx.moveTo(10, 90);
+  // control1=(10,10) control2=(90,10) goal=(50,90)
+  cx.bezierCurveTo(10, 10, 90, 10, 50, 90);
+  cx.lineTo(90, 10);
+  cx.lineTo(10, 10);
+  cx.closePath();
+  cx.stroke();
+</script>
+
+<canvas></canvas>
+<script>
+  let cx = document.querySelector('canvas').getContext('2d');
+  cx.beginPath();
+  // center=(50,50) radius=40 angle=0 to 7
+  cx.arc(50, 50, 40, 0, 7);
+  // center=(150,50) radius=40 angle=0 to ½π
+  cx.arc(150, 50, 40, 0, 0.5 * Math.PI);
+  cx.stroke();
+</script>
+
+<!-- The resulting picture contains a line from the right of the full circle (first call to arc) to the right of the quarter-circle (second call). Like other path-drawing methods, a line drawn with arc is connected to the previous path segment. You can call moveTo or start a new path to avoid this. -->
+
+<canvas width="200" height="200"></canvas>
+<script>
+  const results = [
+    { name: 'Satisfied', count: 1043, color: 'lightblue' },
+    { name: 'Neutral', count: 563, color: 'lightgreen' },
+    { name: 'Unsatisfied', count: 510, color: 'pink' },
+    { name: 'No comment', count: 175, color: 'silver' }
+  ];
+  let cx = document.querySelector('canvas').getContext('2d');
+  let total = results.reduce((sum, { count }) => sum + count, 0);
+  // Start at the top
+  let currentAngle = -0.5 * Math.PI;
+  for (let result of results) {
+    let sliceAngle = (result.count / total) * 2 * Math.PI;
+    cx.beginPath();
+    // center=100,100, radius=100
+    // from current angle, clockwise by slice's angle
+    cx.arc(100, 100, 100, currentAngle, currentAngle + sliceAngle);
+    currentAngle += sliceAngle;
+    cx.lineTo(100, 100);
+    cx.fillStyle = result.color;
+    cx.fill();
+  }
+</script>
+
+<canvas></canvas>
+<script>
+  let cx = document.querySelector('canvas').getContext('2d');
+  cx.font = '28px Georgia';
+  cx.fillStyle = 'fuchsia';
+  cx.fillText('I can draw text, too!', 10, 50);
+</script>
+
+<!-- You can specify the size, style, and font of the text with the font property. This example just gives a font size and family name. It is also possible to add italic or bold to the start of the string to select a style.
+
+The last two arguments to fillText and strokeText provide the position at which the font is drawn. By default, they indicate the position of the start of the text’s alphabetic baseline, which is the line that letters “stand” on, not counting hanging parts in letters such as j or p. You can change the horizontal position by setting the textAlign property to "end" or "center" and the vertical position by setting textBaseline to "top", "middle", or "bottom". -->
+
+<!-- Images
+
+In computer graphics, a distinction is often made between vector graphics and bitmap graphics. The first is what we have been doing so far in this chapter—specifying a picture by giving a logical description of shapes. Bitmap graphics, on the other hand, don’t specify actual shapes but rather work with pixel data (rasters of colored dots).
+
+The drawImage method allows us to draw pixel data onto a canvas. This pixel data can originate from an <img> element or from another canvas. The following example creates a detached <img> element and loads an image file into it. But it cannot immediately start drawing from this picture because the browser may not have loaded it yet. To deal with this, we register a "load" event handler and do the drawing after the image has loaded. -->
+
+<canvas></canvas>
+<script>
+  let cx = document.querySelector('canvas').getContext('2d');
+  let img = document.createElement('img');
+  img.src = 'img/hat.png';
+  img.addEventListener('load', () => {
+    for (let x = 10; x < 200; x += 30) {
+      cx.drawImage(img, x, 10);
+    }
+  });
+</script>
+
+<!-- 
+By default, drawImage will draw the image at its original size. You can also give it two additional arguments to set a different width and height.
+
+When drawImage is given nine arguments, it can be used to draw only a fragment of an image. The second through fifth arguments indicate the rectangle (x, y, width, and height) in the source image that should be copied, and the sixth to ninth arguments give the rectangle (on the canvas) into which it should be copied.
+
+This can be used to pack multiple sprites (image elements) into a single image file and then draw only the part you need. For example, we have this picture containing a game character in multiple poses:
+
+Various poses of a game character
+By alternating which pose we draw, we can show an animation that looks like a walking character.
+
+To animate a picture on a canvas, the clearRect method is useful. It resembles fillRect, but instead of coloring the rectangle, it makes it transparent, removing the previously drawn pixels.
+
+We know that each sprite, each subpicture, is 24 pixels wide and 30 pixels high. The following code loads the image and then sets up an interval (repeated timer) to draw the next frame: -->
+
+<canvas></canvas>
+<script>
+  let cx = document.querySelector('canvas').getContext('2d');
+  let img = document.createElement('img');
+  img.src = 'img/player.png';
+  let spriteW = 24,
+    spriteH = 30;
+  img.addEventListener('load', () => {
+    let cycle = 0;
+    setInterval(() => {
+      cx.clearRect(0, 0, spriteW, spriteH);
+      cx.drawImage(
+        img,
+        // source rectangle
+        cycle * spriteW,
+        0,
+        spriteW,
+        spriteH,
+        // destination rectangle
+        0,
+        0,
+        spriteW,
+        spriteH
+      );
+      cycle = (cycle + 1) % 8;
+    }, 120);
+  });
+</script>
+
+<!-- 
+The cycle binding tracks our position in the animation. For each frame, it is incremented and then clipped back to the 0 to 7 range by using the remainder operator. This binding is then used to compute the x-coordinate that the sprite for the current pose has in the picture. 
+
+The setInterval() method calls a function or evaluates an expression at specified intervals (in milliseconds).
+The setInterval() method will continue calling the function until clearInterval() is called, or the window is closed.
+The ID value returned by setInterval() is used as the parameter for the clearInterval() method.
+Tip: 1000 ms = 1 second.
+Tip: To execute a function only once, after a specified number of milliseconds, use the setTimeout() method.
+-->
+
+<!-- Calling the scale method will cause anything drawn after it to be scaled. This method takes two parameters, one to set a horizontal scale and one to set a vertical scale. -->
+
+<canvas></canvas>
+<script>
+  let cx = document.querySelector('canvas').getContext('2d');
+  cx.scale(3, 0.5);
+  cx.beginPath();
+  cx.arc(50, 50, 40, 0, 7);
+  cx.lineWidth = 3;
+  cx.stroke();
+</script>
+
+<!-- 
+Scaling will cause everything about the drawn image, including the line width, to be stretched out or squeezed together as specified. Scaling by a negative amount will flip the picture around. The flipping happens around point (0,0), which means it will also flip the direction of the coordinate system. When a horizontal scaling of -1 is applied, a shape drawn at x position 100 will end up at what used to be position -100.
+
+So to turn a picture around, we can’t simply add cx.scale(-1, 1) before the call to drawImage because that would move our picture outside of the canvas, where it won’t be visible. You could adjust the coordinates given to drawImage to compensate for this by drawing the image at x position -50 instead of 0. Another solution, which doesn’t require the code that does the drawing to know about the scale change, is to adjust the axis around which the scaling happens. -->
+<!-- 
+There are several other methods besides scale that influence the coordinate system for a canvas. You can rotate subsequently drawn shapes with the rotate method and move them with the translate method. The interesting—and confusing—thing is that these transformations stack, meaning that each one happens relative to the previous transformations.
+
+So if we translate by 10 horizontal pixels twice, everything will be drawn 20 pixels to the right. If we first move the center of the coordinate system to (50,50) and then rotate by 20 degrees (about 0.1π radians), that rotation will happen around point (50,50). But if we first rotate by 20 degrees and then translate by (50,50), the translation will happen in the rotated coordinate system and thus produce a different orientation. The order in which transformations are applied matters. -->
+
+<!-- To flip a picture around the vertical line at a given x position, we can do the following: -->
+<script>
+  function flipHorizontally(context, around) {
+    context.translate(around, 0);
+    context.scale(-1, 1);
+    context.translate(-around, 0);
+  }
+</script>
+
+<!-- We move the y-axis to where we want our mirror to be, apply the mirroring, and finally move the y-axis back to its -->
+<!-- proper place in the mirrored universe. -->
+<!-- 
+This shows the coordinate systems before and after mirroring across the central line. The triangles are numbered to illustrate each step. If we draw a triangle at a positive x position, it would, by default, be in the place where triangle 1 is. A call to flipHorizontally first does a translation to the right, which gets us to triangle 2. It then scales, flipping the triangle over to position 3. This is not where it should be, if it were mirrored in the given line. The second translate call fixes this—it “cancels” the initial translation and makes triangle 4 appear exactly where it should. -->
+
+<canvas></canvas>
+<script>
+  let cx = document.querySelector('canvas').getContext('2d');
+  let img = document.createElement('img');
+  img.src = 'img/player.png';
+  let spriteW = 24,
+    spriteH = 30;
+  img.addEventListener('load', () => {
+    flipHorizontally(cx, 100 + spriteW / 2);
+    cx.drawImage(img, 0, 0, spriteW, spriteH, 100, 0, spriteW, spriteH);
+  });
+</script>
+<!-- 
+It is possible to save the current transformation, do some drawing and transforming, and then restore the old transformation. This is usually the proper thing to do for a function that needs to temporarily transform the coordinate system. First, we save whatever transformation the code that called the function was using. Then the function does its thing, adding more transformations on top of the current transformation. Finally, we revert to the transformation we started with.
+
+The save and restore methods on the 2D canvas context do this transformation management. They conceptually keep a stack of transformation states. When you call save, the current state is pushed onto the stack, and when you call restore, the state on top of the stack is taken off and used as the context’s current transformation. You can also call resetTransform to fully reset the transformation.
+
+The branch function in the following example illustrates what you can do with a function that changes the transformation and then calls a function (in this case itself), which continues drawing with the given transformation.
+
+This function draws a treelike shape by drawing a line, moving the center of the coordinate system to the end of the line, and calling itself twice—first rotated to the left and then rotated to the right. Every call reduces the length of the branch drawn, and the recursion stops when the length drops below 8. -->
+
+<canvas width="600" height="300"></canvas>
+<script>
+  let cx = document.querySelector('canvas').getContext('2d');
+  function branch(length, angle, scale) {
+    cx.fillRect(0, 0, 1, length);
+    if (length < 8) return;
+    cx.save();
+    cx.translate(0, length);
+    cx.rotate(-angle);
+    branch(length * scale, angle, scale);
+    cx.rotate(2 * angle);
+    branch(length * scale, angle, scale);
+    cx.restore();
+  }
+  cx.translate(300, 0);
+  branch(60, 0.5, 0.8);
+</script>
