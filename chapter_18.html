@@ -371,3 +371,100 @@ FileReaders also fire an "error" event when reading the file fails for any reaso
     });
   }
 </script>
+
+<!-- Storing data client-side
+
+Simple HTML pages with a bit of JavaScript can be a great format for “mini applications”—small helper programs that automate basic tasks. By connecting a few form fields with event handlers, you can do anything from converting between centimeters and inches to computing passwords from a master password and a website name.
+
+When such an application needs to remember something between sessions, you cannot use JavaScript bindings—those are thrown away every time the page is closed. You could set up a server, connect it to the Internet, and have your application store something there. We will see how to do that in Chapter 20. But that’s a lot of extra work and complexity. Sometimes it is enough to just keep the data in the browser.
+
+The localStorage object can be used to store data in a way that survives page reloads. This object allows you to file string values under names.
+
+localStorage.setItem("username", "marijn");
+console.log(localStorage.getItem("username"));
+// → marijn
+localStorage.removeItem("username");
+A value in localStorage sticks around until it is overwritten, it is removed with removeItem, or the user clears their local data.
+
+Sites from different domains get different storage compartments. That means data stored in localStorage by a given website can, in principle, be read (and overwritten) only by scripts on that same site.
+
+Browsers do enforce a limit on the size of the data a site can store in localStorage. That restriction, along with the fact that filling up people’s hard drives with junk is not really profitable, prevents the feature from eating up too much space.
+
+The following code implements a crude note-taking application. It keeps a set of named notes and allows the user to edit notes and create new ones. -->
+
+Notes:
+<select></select>
+<button>Add</button><br />
+<textarea style="width: 100%"></textarea>
+
+<script>
+  let list = document.querySelector('select');
+  let note = document.querySelector('textarea');
+
+  let state;
+  function setState(newState) {
+    list.textContent = '';
+    for (let name of Object.keys(newState.notes)) {
+      let option = document.createElement('option');
+      option.textContent = name;
+      if (newState.selected == name) option.selected = true;
+      list.appendChild(option);
+    }
+    note.value = newState.notes[newState.selected];
+
+    localStorage.setItem('Notes', JSON.stringify(newState));
+    state = newState;
+  }
+  setState(
+    JSON.parse(localStorage.getItem('Notes')) || {
+      notes: { 'shopping list': 'Carrots\nRaisins' },
+      selected: 'shopping list'
+    }
+  );
+
+  list.addEventListener('change', () => {
+    setState({ notes: state.notes, selected: list.value });
+  });
+  note.addEventListener('change', () => {
+    setState({
+      notes: Object.assign({}, state.notes, { [state.selected]: note.value }),
+      selected: state.selected
+    });
+  });
+  document.querySelector('button').addEventListener('click', () => {
+    let name = prompt('Note name');
+    if (name)
+      setState({
+        notes: Object.assign({}, state.notes, { [name]: '' }),
+        selected: name
+      });
+  });
+</script>
+
+<!-- The script gets its starting state from the "Notes" value stored in localStorage or, if that is missing, creates an example state that has only a shopping list in it. Reading a field that does not exist from localStorage will yield null. Passing null to JSON.parse will make it parse the string "null" and return null. Thus, the || operator can be used to provide a default value in a situation like this.
+
+The setState method makes sure the DOM is showing a given state and stores the new state to localStorage. Event handlers call this function to move to a new state.
+
+The use of Object.assign in the example is intended to create a new object that is a clone of the old state.notes, but with one property added or overwritten. Object.assign takes its first argument and adds all properties from any further arguments to it. Thus, giving it an empty object will cause it to fill a fresh object. The square brackets notation in the third argument is used to create a property whose name is based on some dynamic value.
+
+There is another object, similar to localStorage, called sessionStorage. The difference between the two is that the content of sessionStorage is forgotten at the end of each session, which for most browsers means whenever the browser is closed. -->
+
+<!-- Summary
+In this chapter, we discussed how the HTTP protocol works. A client sends a request, which contains a method (usually GET) and a path that identifies a resource. The server then decides what to do with the request and responds with a status code and a response body. Both requests and responses may contain headers that provide additional information.
+
+The interface through which browser JavaScript can make HTTP requests is called fetch. Making a request looks like this:
+
+fetch("/18_http.html").then(r => r.text()).then(text => {
+  console.log(`The page starts with ${text.slice(0, 15)}`);
+});
+Browsers make GET requests to fetch the resources needed to display a web page. A page may also contain forms, which allow information entered by the user to be sent as a request for a new page when the form is submitted.
+
+HTML can represent various types of form fields, such as text fields, checkboxes, multiple-choice fields, and file pickers.
+
+Such fields can be inspected and manipulated with JavaScript. They fire the "change" event when changed, fire the "input" event when text is typed, and receive keyboard events when they have keyboard focus. Properties like value (for text and select fields) or checked (for checkboxes and radio buttons) are used to read or set the field’s content.
+
+When a form is submitted, a "submit" event is fired on it. A JavaScript handler can call preventDefault on that event to disable the browser’s default behavior. Form field elements may also occur outside of a form tag.
+
+When the user has selected a file from their local file system in a file picker field, the FileReader interface can be used to access the content of this file from a JavaScript program.
+
+The localStorage and sessionStorage objects can be used to save information in a way that survives page reloads. The first object saves the data forever (or until the user decides to clear it), and the second saves it until the browser is closed. -->
