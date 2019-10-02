@@ -364,3 +364,119 @@ function startPixelEditor({ state = startState, tools = baseTools, controls = ba
   });
   return app.dom;
 }
+
+// When destructuring an object or array, you can use = after a binding name to give the binding a default value, which is used when the property is missing or holds undefined. The startPixelEditor function makes use of this to accept an object with a number of optional properties as an argument. If you don’t provide a tools property, for example, tools will be bound to baseTools.
+
+// This is how we get an actual editor on the screen:
+
+// <div></div>
+// <script>
+//   document.querySelector("div")
+//     .appendChild(startPixelEditor({}));
+// </script>
+
+// Technology never exists in a vacuum—we’re constrained by our tools and the social, economic, and historical factors that produced them. This can be annoying, but it is generally more productive to try to build a good understanding of how the existing technical reality works—and why it is the way it is—than to rage against it or hold out for another reality.
+
+// Keyboard bindings
+
+class PixelEditor {
+  constructor(state, config) {
+    let { tools, controls, dispatch } = config;
+    this.state = state;
+
+    this.canvas = new PictureCanvas(state.picture, pos => {
+      let tool = tools[this.state.tool];
+      let onMove = tool(pos, this.state, dispatch);
+      if (onMove) {
+        return pos => onMove(pos, this.state, dispatch);
+      }
+    });
+    this.controls = controls.map(Control => new Control(state, config));
+    this.dom = elt(
+      'div',
+      {
+        tabIndex: 0,
+        onkeydown: event => this.keyDown(event, config)
+      },
+      this.canvas.dom,
+      elt('br'),
+      ...this.controls.reduce((a, c) => a.concat(' ', c.dom), [])
+    );
+  }
+  keyDown(event, config) {
+    if (event.key == 'z' && (event.ctrlKey || event.metaKey)) {
+      event.preventDefault();
+      config.dispatch({ undo: true });
+    } else if (!event.ctrlKey && !event.metaKey && !event.altKey) {
+      for (let tool of Object.keys(config.tools)) {
+        if (tool[0] == event.key) {
+          event.preventDefault();
+          config.dispatch({ tool });
+          return;
+        }
+      }
+    }
+  }
+  syncState(state) {
+    this.state = state;
+    this.canvas.syncState(state.picture);
+    for (let ctrl of this.controls) ctrl.syncState(state);
+  }
+}
+
+// Efficient drawing
+
+PictureCanvas.prototype.syncState = function(picture) {
+  if (this.picture == picture) return;
+  drawPicture(picture, this.dom, scale, this.picture);
+  this.picture = picture;
+};
+
+function drawPicture(picture, canvas, scale, previous) {
+  if (previous == null || previous.width != picture.width || previous.height != picture.height) {
+    canvas.width = picture.width * scale;
+    canvas.height = picture.height * scale;
+    previous = null;
+  }
+
+  let cx = canvas.getContext('2d');
+  for (let y = 0; y < picture.height; y++) {
+    for (let x = 0; x < picture.width; x++) {
+      let color = picture.pixel(x, y);
+      if (previous == null || previous.pixel(x, y) != color) {
+        cx.fillStyle = color;
+        cx.fillRect(x * scale, y * scale, scale, scale);
+      }
+    }
+  }
+}
+
+document.querySelector('div').appendChild(startPixelEditor({}));
+
+// Circles
+
+function circle(pos, state, dispatch) {
+  function drawCircle(to) {
+    let radius = Math.sqrt(Math.pow(to.x - pos.x, 2) + Math.pow(to.y - pos.y, 2));
+    let radiusC = Math.ceil(radius);
+    let drawn = [];
+    for (let dy = -radiusC; dy <= radiusC; dy++) {
+      for (let dx = -radiusC; dx <= radiusC; dx++) {
+        let dist = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
+        if (dist > radius) continue;
+        let y = pos.y + dy,
+          x = pos.x + dx;
+        if (y < 0 || y >= state.picture.height || x < 0 || x >= state.picture.width) continue;
+        drawn.push({ x, y, color: state.color });
+      }
+    }
+    dispatch({ picture: state.picture.draw(drawn) });
+  }
+  drawCircle(pos);
+  return drawCircle;
+}
+
+let dom = startPixelEditor({
+  tools: Object.assign({}, baseTools, { circle })
+});
+document.querySelector('div').appendChild(dom);
