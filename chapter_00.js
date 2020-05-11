@@ -51,3 +51,5 @@ function factorial(n) {
 
 console.log(factorial(8));
 // → 40320
+
+// edit test
