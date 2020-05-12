@@ -3,11 +3,11 @@
 // The concept of wrapping a piece of program in a value has many uses. It gives us a way to structure larger programs,
 // to reduce repetition, to associate names with subprograms, and to isolate these subprograms from each other.
 
-const square = function(x) {
-  return x * x;
-};
+// const square = function(x) {
+//   return x * x;
+// };
 
-console.log(square(12));
+// console.log(square(12));
 // → 144
 
 // A return statement determines the value the function returns. When control comes across such a statement,
@@ -32,51 +32,51 @@ console.log(square(12));
 // In pre-2015 JavaScript, only functions created new scopes, so old-style bindings, created with the var keyword, are visible throughout
 // the whole function that they appear in—or throughout the global scope, if they are not in a function.
 
-let x = 10;
-if (true) {
-  let y = 20;
-  var z = 30;
-  console.log(x + y + z);
-  // → 60
-}
+// let x = 10;
+// if (true) {
+//   let y = 20;
+//   var z = 30;
+//   console.log(x + y + z);
+// → 60
+// }
 // y is not visible here
-console.log(x + z);
+// console.log(x + z);
 // → 40
 
 // Each scope can “look out” into the scope around it, so x is visible inside the block in the example. The exception is when
 // multiple bindings have the same name—in that case, code can see only the innermost one. For example, when the code inside the
 // halve function refers to n, it is seeing its own n, not the global n.
 
-const halve = function(n) {
-  return n / 2;
-};
+// const halve = function(n) {
+//   return n / 2;
+// };
 
-let n = 10;
-console.log(halve(100));
+// let n = 10;
+// console.log(halve(100));
 // → 50
-console.log(n);
+// console.log(n);
 // → 10
 
 // JavaScript distinguishes not just global and local bindings. Blocks and functions can be created inside other blocks and functions, producing
 // multiple degrees of locality.
 
-const hummus = function(factor) {
-  const ingredient = function(amount, unit, name) {
-    let ingredientAmount = amount * factor;
-    if (ingredientAmount > 1) {
-      unit += 's';
-    }
-    console.log(`${ingredientAmount} ${unit} ${name}`);
-  };
-  ingredient(1, 'can', 'chickpeas');
-  ingredient(0.25, 'cup', 'tahini');
-  ingredient(0.25, 'cup', 'lemon juice');
-  ingredient(1, 'clove', 'garlic');
-  ingredient(2, 'tablespoon', 'olive oil');
-  ingredient(0.5, 'teaspoon', 'cumin');
-};
+// const hummus = function(factor) {
+//   const ingredient = function(amount, unit, name) {
+//     let ingredientAmount = amount * factor;
+//     if (ingredientAmount > 1) {
+//       unit += 's';
+//     }
+//     console.log(`${ingredientAmount} ${unit} ${name}`);
+//   };
+//   ingredient(1, 'can', 'chickpeas');
+//   ingredient(0.25, 'cup', 'tahini');
+//   ingredient(0.25, 'cup', 'lemon juice');
+//   ingredient(1, 'clove', 'garlic');
+//   ingredient(2, 'tablespoon', 'olive oil');
+//   ingredient(0.5, 'teaspoon', 'cumin');
+// };
 
-hummus(2);
+// hummus(2);
 
 // The code inside the ingredient function can see the factor binding from the outer function. But its local bindings,
 // such as unit or ingredientAmount, are not visible in the outer function.
@@ -110,11 +110,11 @@ hummus(2);
 
 // There is one subtlety with this form of function definition.
 
-console.log('The future says:', future());
+// console.log('The future says:', future());
 
-function future() {
-  return "You'll never have flying cars";
-}
+// function future() {
+//   return "You'll never have flying cars";
+// }
 // The preceding code works, even though the function is defined below the code that uses it.
 // Function declarations are not part of the regular top-to-bottom flow of control. They are conceptually moved to the top
 // of their scope and can be used by all the code in that scope. This is sometimes useful because it offers the freedom
@@ -125,13 +125,13 @@ function future() {
 // it uses an arrow (=>) made up of an equal sign and a greater-than character (not to be confused with the greater-than-or-equal
 // operator, which is written >=).
 
-const power = (base, exponent) => {
-  let result = 1;
-  for (let count = 0; count < exponent; count++) {
-    result *= base;
-  }
-  return result;
-};
+// const power = (base, exponent) => {
+//   let result = 1;
+//   for (let count = 0; count < exponent; count++) {
+//     result *= base;
+//   }
+//   return result;
+// };
 
 // The arrow comes after the list of parameters and is followed by the function’s body. It expresses something like “this input
 // (the parameters) produces this result (the body)”.
@@ -139,15 +139,15 @@ const power = (base, exponent) => {
 // When there is only one parameter name, you can omit the parentheses around the parameter list. If the body is a single expression,
 // rather than a block in braces, that expression will be returned from the function. So, these two definitions of square do the same thing:
 
-const square1 = x => {
-  return x * x;
-};
-const square2 = x => x * x;
+// const square1 = x => {
+//   return x * x;
+// };
+// const square2 = x => x * x;
 // When an arrow function has no parameters at all, its parameter list is just an empty set of parentheses.
 
-const horn = () => {
-  console.log('Toot');
-};
+// const horn = () => {
+//   console.log('Toot');
+// };
 // There’s no deep reason to have both arrow functions and function expressions in the language. Apart from a minor detail,
 // which we’ll discuss in Chapter 6, they do the same thing. Arrow functions were added in 2015, mostly to make it possible to write
 // small function expressions in a less verbose way.
@@ -156,11 +156,11 @@ const horn = () => {
 // The way control flows through functions is somewhat involved. Let’s take a closer look at it.
 // Here is a simple program that makes a few function calls:
 
-function greet(who) {
-  console.log('Hello ' + who);
-}
-greet('Harry');
-console.log('Bye');
+// function greet(who) {
+//   console.log('Hello ' + who);
+// }
+// greet('Harry');
+// console.log('Bye');
 
 // A run through this program goes roughly like this: the call to greet causes control to jump to the start of that function (line 2).
 // The function calls console.log, which takes control, does its job, and then returns control to line 2. There it reaches the end of the greet function,
@@ -188,12 +188,12 @@ console.log('Bye');
 // causes an infinite back-and-forth between two functions. Rather, it would be infinite, if the computer had an infinite stack.
 // As it is, we will run out of space, or “blow the stack”.
 
-function chicken() {
-  return egg();
-}
-function egg() {
-  return chicken();
-}
+// function chicken() {
+//   return egg();
+// }
+// function egg() {
+//   return chicken();
+// }
 // console.log(chicken() + ' came first.');
 // → RangeError: Maximum call stack size exceeded
 
@@ -218,15 +218,15 @@ function egg() {
 // The upside is that this behavior can be used to allow a function to be called with different numbers of arguments. For example,
 // this minus function tries to imitate the - operator by acting on either one or two arguments:
 
-function minus(a, b) {
-  if (b === undefined) return -a;
-  else return a - b;
-}
+// function minus(a, b) {
+//   if (b === undefined) return -a;
+//   else return a - b;
+// }
 
-console.log(minus(10));
-// → -10
-console.log(minus(10, 5));
-// → 5
+// console.log(minus(10));
+// // → -10
+// console.log(minus(10, 5));
+// // → 5
 
 // If you write an = operator after a parameter, followed by an expression, the value of that expression will replace
 // the argument when it is not given.
@@ -234,23 +234,23 @@ console.log(minus(10, 5));
 // For example, this version of power makes its second argument optional. If you don’t provide it or pass the value undefined, it will default to two,
 // and the function will behave like square.
 
-function power_again(base, exponent = 2) {
-  let result = 1;
-  for (let count = 0; count < exponent; count++) {
-    result *= base;
-  }
-  return result;
-}
+// function power_again(base, exponent = 2) {
+//   let result = 1;
+//   for (let count = 0; count < exponent; count++) {
+//     result *= base;
+//   }
+//   return result;
+// }
 
-console.log(power_again(4));
-// → 16
-console.log(power_again(2, 6));
-// → 64
+// console.log(power_again(4));
+// // → 16
+// console.log(power_again(2, 6));
+// // → 64
 
 // In the next chapter, we will see a way in which a function body can get at the whole list of arguments it was passed. This is helpful
 // because it makes it possible for a function to accept any number of arguments. For example, console.log does this—it outputs all of the values it is given.
 
-console.log('C', 'O', 2);
+// console.log('C', 'O', 2);
 // → C O 2
 
 // Closure
@@ -260,17 +260,17 @@ console.log('C', 'O', 2);
 // The following code shows an example of this. It defines a function, wrapValue, that creates a local binding. It then returns a
 // function that accesses and returns this local binding.
 
-function wrapValue(n) {
-  let local = n;
-  return () => local;
-}
+// function wrapValue(n) {
+//   let local = n;
+//   return () => local;
+// }
 
-let wrap1 = wrapValue(1);
-let wrap2 = wrapValue(2);
-console.log(wrap1());
-// → 1
-console.log(wrap2());
-// → 2
+// let wrap1 = wrapValue(1);
+// let wrap2 = wrapValue(2);
+// console.log(wrap1());
+// // → 1
+// console.log(wrap2());
+// // → 2
 
 // This is allowed and works as you’d hope—both instances of the binding can still be accessed. This situation is a good demonstration of
 // the fact that local bindings are created anew for every call, and different calls can’t trample on one another’s local bindings.
@@ -281,12 +281,12 @@ console.log(wrap2());
 
 // With a slight change, we can turn the previous example into a way to create functions that multiply by an arbitrary amount.
 
-function multiplier(factor) {
-  return number => number * factor;
-}
+// function multiplier(factor) {
+//   return number => number * factor;
+// }
 
-let twice = multiplier(2);
-console.log(twice(5));
+// let twice = multiplier(2);
+// console.log(twice(5));
 // → 10
 
 // The explicit local binding from the wrapValue example isn’t really needed since a parameter is itself a local binding.
@@ -304,9 +304,12 @@ console.log(twice(5));
 // Take, for example, this alternative implementation of power:
 
 function power_recursive(base, exponent) {
+  console.log(`calling power_recursive with exponent ${exponent}`);
   if (exponent == 0) {
+    console.log('returning 1');
     return 1;
   } else {
+    console.log(`returning base * power_recursive(base: ${base}, exponent: ${exponent} - 1)`);
     return base * power_recursive(base, exponent - 1);
   }
 }
@@ -327,20 +330,20 @@ console.log(power_recursive(2, 3));
 
 // Here is a recursive solution:
 
-function findSolution(target) {
-  function find(current, history) {
-    if (current == target) {
-      return history;
-    } else if (current > target) {
-      return null;
-    } else {
-      return find(current + 5, `(${history} + 5)`) || find(current * 3, `(${history} * 3)`);
-    }
-  }
-  return find(1, '1');
-}
+// function findSolution(target) {
+//   function find(current, history) {
+//     if (current == target) {
+//       return history;
+//     } else if (current > target) {
+//       return null;
+//     } else {
+//       return find(current + 5, `(${history} + 5)`) || find(current * 3, `(${history} * 3)`);
+//     }
+//   }
+//   return find(1, '1');
+// }
 
-console.log(findSolution(24));
+// console.log(findSolution(24));
 // → (((1 * 3) + 5) * 3)
 
 // The inner function find does the actual recursing. It takes two arguments: the current number and a string that records how we reached this number.
@@ -392,19 +395,19 @@ console.log(findSolution(24));
 
 // This asks for a function of two arguments—the number of cows and the number of chickens. Let’s get coding.
 
-function printFarmInventory(cows, chickens) {
-  let cowString = String(cows);
-  while (cowString.length < 3) {
-    cowString = '0' + cowString;
-  }
-  console.log(`${cowString} Cows`);
-  let chickenString = String(chickens);
-  while (chickenString.length < 3) {
-    chickenString = '0' + chickenString;
-  }
-  console.log(`${chickenString} Chickens`);
-}
-printFarmInventory(7, 11);
+// function printFarmInventory(cows, chickens) {
+//   let cowString = String(cows);
+//   while (cowString.length < 3) {
+//     cowString = '0' + cowString;
+//   }
+//   console.log(`${cowString} Cows`);
+//   let chickenString = String(chickens);
+//   while (chickenString.length < 3) {
+//     chickenString = '0' + chickenString;
+//   }
+//   console.log(`${chickenString} Chickens`);
+// }
+// printFarmInventory(7, 11);
 
 // Writing .length after a string expression will give us the length of that string. Thus, the while loops keep adding zeros
 // in front of the number strings until they are at least three characters long.
@@ -425,7 +428,7 @@ function printFarmInventory2(cows, chickens, pigs) {
   console.log(`${zeroPad(pigs, 3)} Pigs`);
 }
 
-printFarmInventory2(7, 16, 3);
+// printFarmInventory2(7, 16, 3);
 
 // A useful principle is to not add cleverness unless you are absolutely sure you’re going to need it.
 // It can be tempting to write general “frameworks” for every bit of functionality you come across. Resist that urge.
@@ -456,7 +459,7 @@ printFarmInventory2(7, 16, 3);
 // Arrow functions are yet another way to create functions.
 
 // Define f to hold a function value
-const f = function(a) {
+const f = function (a) {
   console.log(a + 2);
 };
 
@@ -466,7 +469,7 @@ function g(a, b) {
 }
 
 // A less verbose function value
-let h = a => a % 3;
+let h = (a) => a % 3;
 
 // A key aspect in understanding functions is understanding scopes. Each block creates a new scope. Parameters and bindings declared in a
 // given scope are local and not visible from the outside. Bindings declared with var behave differently—they end up in the nearest function
