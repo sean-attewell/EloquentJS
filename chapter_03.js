@@ -350,10 +350,11 @@ function power_recursive(base, exponent) {
 // Here is a recursive solution:
 
 function findSolution(target) {
+  console.log(`findSolution has been given a target of ${target}`);
   function find(current, history) {
     console.log(`history is ${history}`);
     if (current == target) {
-      console.log(`current is ${current} which matches the target, so return the history`);
+      console.log(`current is ${current} which matches the target of ${target}, so return the history`);
       return history;
     } else if (current > target) {
       console.log(`current is ${current} which is too big, return null`);
@@ -367,7 +368,7 @@ function findSolution(target) {
   return find(1, '1');
 }
 
-console.log(findSolution(13));
+// console.log(findSolution(13));
 // → (((1 * 3) + 5) + 5)
 
 // The inner function find does the actual recursing. It takes two arguments: the current number and a string that records how we reached this number.
@@ -419,18 +420,18 @@ console.log(findSolution(13));
 
 // This asks for a function of two arguments—the number of cows and the number of chickens. Let’s get coding.
 
-// function printFarmInventory(cows, chickens) {
-//   let cowString = String(cows);
-//   while (cowString.length < 3) {
-//     cowString = '0' + cowString;
-//   }
-//   console.log(`${cowString} Cows`);
-//   let chickenString = String(chickens);
-//   while (chickenString.length < 3) {
-//     chickenString = '0' + chickenString;
-//   }
-//   console.log(`${chickenString} Chickens`);
-// }
+function printFarmInventory(cows, chickens) {
+  let cowString = String(cows);
+  while (cowString.length < 3) {
+    cowString = '0' + cowString;
+  }
+  console.log(`${cowString} Cows`);
+  let chickenString = String(chickens);
+  while (chickenString.length < 3) {
+    chickenString = '0' + chickenString;
+  }
+  console.log(`${chickenString} Chickens`);
+}
 // printFarmInventory(7, 11);
 
 // Writing .length after a string expression will give us the length of that string. Thus, the while loops keep adding zeros
@@ -452,7 +453,7 @@ function printFarmInventory2(cows, chickens, pigs) {
   console.log(`${zeroPad(pigs, 3)} Pigs`);
 }
 
-// printFarmInventory2(7, 16, 3);
+printFarmInventory2(7, 16, 3);
 
 // A useful principle is to not add cleverness unless you are absolutely sure you’re going to need it.
 // It can be tempting to write general “frameworks” for every bit of functionality you come across. Resist that urge.
