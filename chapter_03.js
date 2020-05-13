@@ -314,8 +314,27 @@ function power_recursive(base, exponent) {
   }
 }
 
-console.log(power_recursive(2, 3));
+// console.log(power_recursive(2, 3));
 // → 8
+
+// https://www.youtube.com/watch?v=Mv9NEXX1VHc
+// as the exponent changes with each recursive call of the function, you need a stack to track what it is.
+
+// 2^3 = 2 * 2^2
+// 2^2 = 2 * 2^1
+// 2^1 = 2 * 2^0
+// 2^0 = 1
+
+// 2^3 = 2 * 4 = 8
+// 2^2 = 2 * 2 = 4
+// 2^1 = 2 * 1 = 2
+// 2^0 = 1
+
+// So the exponent 3 frame is waiting on the exponent 2 frame stacked on top, which is waiting on the exponent 1 frame, which is waiting for the exponent 0 frame.
+// Exponent 0 says: Here you go I'm 1, and it returns into the PENDING MULTIPLIER for exponent 2 to give 2 * 1 = 2
+// Exponent 1 says: Here you go, I'm 2, and it returns into the PENDING MULTIPLIER for exponent 2 to give 2 * 2 which is 4
+// Exponent 2 says: Here you go, I'm 4, and it returns into the PENDING MULTIPLIER for exponent 3 to give 2 * 4 which is 8
+// Exponent 3 is the orignal frame then returns 8
 
 // typical JavaScript implementations, it’s about three times slower than the looping version.
 // Running through a simple loop is generally cheaper than calling a function multiple times.
@@ -330,21 +349,26 @@ console.log(power_recursive(2, 3));
 
 // Here is a recursive solution:
 
-// function findSolution(target) {
-//   function find(current, history) {
-//     if (current == target) {
-//       return history;
-//     } else if (current > target) {
-//       return null;
-//     } else {
-//       return find(current + 5, `(${history} + 5)`) || find(current * 3, `(${history} * 3)`);
-//     }
-//   }
-//   return find(1, '1');
-// }
+function findSolution(target) {
+  function find(current, history) {
+    console.log(`history is ${history}`);
+    if (current == target) {
+      console.log(`current is ${current} which matches the target, so return the history`);
+      return history;
+    } else if (current > target) {
+      console.log(`current is ${current} which is too big, return null`);
+      return null;
+    } else {
+      console.log(`current is ${current}`);
+      return find(current + 5, `(${history} + 5)`) || find(current * 3, `(${history} * 3)`);
+    }
+  }
+  console.log(`findSolution begins by running find with a current of 1 and history of 1`);
+  return find(1, '1');
+}
 
-// console.log(findSolution(24));
-// → (((1 * 3) + 5) * 3)
+console.log(findSolution(13));
+// → (((1 * 3) + 5) + 5)
 
 // The inner function find does the actual recursing. It takes two arguments: the current number and a string that records how we reached this number.
 // If it finds a solution, it returns a string that shows how to get to the target. If no solution can be found starting from this number, it returns null.
