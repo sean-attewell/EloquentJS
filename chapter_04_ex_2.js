@@ -87,7 +87,8 @@ function arrayToList(array) {
   return list;
 }
 
-console.log(arrayToList(['A', 'B', 'C', 'D', 'E', 'F'])); // seems to log more in the browser, but limited to 3 deep in bash terminal on VSC.
+// console.log(arrayToList(['A', 'B', 'C', 'D', 'E', 'F'])); // seems to log more in the browser, but limited to 3 deep in bash terminal on VSC.
+// console.log(arrayToList(['A', 'B', 'C']));
 
 //This means you're working from the inside out.
 // F will have a rest of null
@@ -111,6 +112,60 @@ console.log(arrayToList(['A', 'B', 'C', 'D', 'E', 'F'])); // seems to log more i
 // { value: 'A',
 //   rest: { value: 'B', rest: { value: 'C', rest: [Object] } } }
 
+let myList = { value: 'A', rest: { value: 'B', rest: { value: 'C', rest: null } } };
+
+// console.log(myList);
+
 function listToArray(list) {
   let arr = [];
+  for (let i = 0; ; i++) {
+    if (list.rest === null) {
+      arr.push(list.value);
+      break;
+    } else {
+      arr.push(list.value);
+      list = list.rest;
+    }
+  }
+  return arr;
 }
+
+// console.log(listToArray(myList));
+// console.log(myList);
+
+function listToArray2(list) {
+  let array = [];
+  for (let node = list; node; node = node.rest) {
+    array.push(node.value);
+  }
+  return array;
+}
+
+// console.log(listToArray2(myList));
+
+function prepend(element, list) {
+  let newlist = { value: element, rest: list };
+  return newlist;
+}
+
+function prepend2(element, list) {
+  return { value: element, rest: list };
+}
+
+// console.log(prepend2('Z', myList));
+
+function nth(list, num) {
+  let arr = listToArray2(list);
+  return arr[num]; // returns undefined by default if not present
+}
+
+// console.log(myList);
+// console.log(nth(myList, 1));
+
+function nth2(list, n) {
+  if (!list) return undefined;
+  else if (n == 0) return list.value;
+  else return nth(list.rest, n - 1); // digs deeper into the list
+}
+
+console.log(nth2(myList, 2));
