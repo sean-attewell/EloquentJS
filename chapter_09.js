@@ -306,7 +306,7 @@ console.log('Liskov, Barbara\nMcCarthy, John\nWadler, Philip'.replace(/(\w+), (\
 // Here’s a small example:
 
 let s = 'the cia and fbi';
-console.log(s.replace(/\b(fbi|cia)\b/g, str => str.toUpperCase()));
+console.log(s.replace(/\b(fbi|cia)\b/g, (str) => str.toUpperCase()));
 // → the CIA and FBI
 
 // Here’s a more interesting one:
@@ -382,6 +382,7 @@ console.log(stripComments('1 /* a */+/* b */ 1'));
 let name = 'harry';
 let text = 'Harry is a suspicious character.';
 let regexp = new RegExp('\\b(' + name + ')\\b', 'gi');
+// DONT GET CONFUSED, You're putting one long string into RegExp class, but it's broken into string + variable(also a string) + string
 console.log(regexp);
 /// \b(harry)\b/gi
 console.log(text.replace(regexp, '_$1_'));
@@ -532,7 +533,7 @@ function parseINI(string) {
   // Start with an object to hold the top-level fields
   let result = {};
   let section = result;
-  string.split(/\r?\n/).forEach(line => {
+  string.split(/\r?\n/).forEach((line) => {
     let match;
     if ((match = line.match(/^(\w+)=(.*)$/))) {
       section[match[1]] = match[2];
