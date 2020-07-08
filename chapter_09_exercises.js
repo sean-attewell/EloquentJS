@@ -48,9 +48,17 @@ function verify(regexp, yes, no) {
 // and craft a call to the replace method that does the proper replacement.
 
 let text = "'I'm the cook,' he said, 'it's my job.'";
+let regex = /(^|\W)'|'(\W|$)/;
 // Change this call.
-console.log(text.replace(/(^|\W)'|'(\W|$)/g, '$1"$2'));
+console.log(text.replace(regex, '$1"$2'));
 // → "I'm the cook," he said, "it's my job."
+
+// if there is a single quote after non-word character or the start
+// Or
+// if there is a single quote before the non-word character or the end
+
+// without the g it replaces only the first quote.
+// So in the second arg to replace, it must just ignore which group isn't on the or.
 
 // Numbers again
 // Write an expression that matches only JavaScript-style numbers. It must support an optional minus or plus sign in

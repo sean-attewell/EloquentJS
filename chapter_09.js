@@ -539,6 +539,7 @@ function parseINI(string) {
       section[match[1]] = match[2];
     } else if ((match = line.match(/^\[(.*)\]$/))) {
       section = result[match[1]] = {};
+      console.log(match);
     } else if (!/^\s*(;.*)?$/.test(line)) {
       throw new Error("Line '" + line + "' is not valid.");
     }
