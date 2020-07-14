@@ -1,31 +1,34 @@
-// 'use strict';
-
-// let array = ['A', 'B', 'C'];
-
-// function arrayToList(arr) {
-//   let list = null;
-//   for (let i = arr.length - 1; i >= 0; i--) {
-//     list = { value: arr[i], rest: list };
-//   }
-//   return list;
+// const x = 1;
+// function evalAndReturnX(code) {
+//   eval(code);
+//   return x;
 // }
+// console.log(evalAndReturnX('var x=2')); // 2
+// console.log(x); // 1
+// var is only contained by functions. So var x=2 gets into the function it's in
 
-// console.log(arrayToList(array));
+// const x = 1;
+// function evalAndReturnX(code) {
+//   eval(code);
+//   return x;
+// }
+// console.log(evalAndReturnX('let x=2')); // 1
+// console.log(x); // 1
+// Let here must be trapped in the scope of a code block within eval, can't be seen in function
+// more evidence below.
 
-let obj = { X: 5, y: 6 };
+function evalAndReturnX(code) {
+  let y;
+  eval(code);
+  return y;
+}
+console.log(evalAndReturnX('let y=2')); // undefined
+// it doesn't complain that y is already defined because let is stuck in a code block
 
-let str = JSON.stringify(obj);
-
-// console.log(JSON.parse('{ "X": 5, "y": 6 }'));
-// console.log(JSON.parse(str));
-// console.log(str.repeat(3));
-// console.log('ihasd aspoj sapoj soj s'.split(' '));
-// console.log(['ihasd', 'aspoj', 'sapoj', 'soj', 's'].join('. '));
-
-// console.log(['ihasdwwww', 'aspoj', 'sapoj', 'soj', 's'].findIndex((element) => element.length < 5));
-// --> 3
-// console.log('toString' in obj); // true
-// console.log(obj.hasOwnProperty('toString')); // false
-
-// console.log(true * 'Monkey');
-// NaN
+function evalAndReturnX(code) {
+  let y;
+  eval(code);
+  return y;
+}
+console.log(evalAndReturnX('y=2')); // 2
+// this does re-assign y because it obtains the value of the local variable

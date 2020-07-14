@@ -26,3 +26,7 @@ console.log(story.replace(/(^|\W)'|'(\W|$)/g, '$1"$2'));
 
 // without the g it replaces only the first quote.
 // So in the second arg to replace, it must just ignore which group isn't on the or.
+
+// Numbers again
+
+let numbers = /^[+\-]?(\d+(\.\d*)?|\.\d+)([eE][+\-]?\d+)?$/;
