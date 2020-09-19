@@ -52,7 +52,7 @@ class Group {
   static from(iterableObject) {
     let newGroup = new Group();
     for (let item of iterableObject) {
-      // This for of loop needs let... doesn't normally...
+      // Important to remember let in for loop
       newGroup.add(item);
     }
     return newGroup;

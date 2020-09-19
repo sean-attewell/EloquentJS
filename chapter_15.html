@@ -429,16 +429,6 @@ Scrolling can be detected with the "scroll" event, and focus changes can be dete
 <!-- <p>🎈</p>
 
 <script>
-  window.addEventListener('keydown', event => {
-    if (event.key == 'ArrowUp') {
-      let balloon = document.querySelector('p');
-      balloon.style.fontSize = '100px';
-      console.log('it did');
-    }
-  });
-</script>
-
-<script>
   let p = document.querySelector('p');
   let size;
   function setSize(newSize) {
@@ -462,9 +452,9 @@ Scrolling can be detected with the "scroll" event, and focus changes can be dete
     }
   }
   document.body.addEventListener('keydown', handleArrow);
-</script>
+</script> -->
 
-<style>
+<!-- <style>
   .trail {
     /* className for the trail elements */
     position: absolute;
@@ -487,13 +477,19 @@ Scrolling can be detected with the "scroll" event, and focus changes can be dete
       document.body.appendChild(node);
       dots.push(node);
     }
+
     let currentDot = 0;
 
-    window.addEventListener('mousemove', event => {
+    window.addEventListener('mousemove', (event) => {
       let dot = dots[currentDot];
       dot.style.left = event.pageX - 3 + 'px';
       dot.style.top = event.pageY - 3 + 'px';
-      currentDot = (currentDot + 1) % dots.length;
+      currentDot = (currentDot + 1) % dots.length; // resets current dot to zero when no remainder
+      // 7 mod 5 is 2 because 5 goes into 7 one time, 1x5 is 5 and 7-5 is 2.
+      // 8 mod 3 is 1 because 3 goes into 8 two times, 2x3 is 6 and 8-6 is 2.
+      // 4 mod 12 is 4 because 12 goes into 4 zero times, 12x0 is 0 and 4 - 0 is 4.
+      // 12 mod 12 is 0 because 12 goes into 12 one time, 1x12 is 12 and 12 - 12 is 0.
+      // possibly two methods modulo and modulus https://divisible.info/Modulo/What-is-4-mod-12.html
     });
   </script>
 </body> -->
@@ -505,7 +501,7 @@ Scrolling can be detected with the "scroll" event, and focus changes can be dete
 </tab-panel>
 <script>
   function asTabs(node) {
-    let tabs = Array.from(node.children).map(node => {
+    let tabs = Array.from(node.children).map((node) => {
       let button = document.createElement('button');
       button.textContent = node.getAttribute('data-tabname');
       let tab = { node, button };
